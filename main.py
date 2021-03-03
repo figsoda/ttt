@@ -54,7 +54,8 @@ def handle(st, ev):
         x, y = pg.mouse.get_pos()
 
         def get_grid(x):
-            if x >= 20 and x < 220: return 0
+            if x < 20: return None
+            if x < 220: return 0
             if x < 420: return 1
             if x < 620: return 2
 
