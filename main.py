@@ -1,8 +1,8 @@
 from itertools import chain
 import pygame as pg
 
-BG = (31, 34, 39)
-FG = (171, 179, 191)
+BG = 31, 34, 39
+FG = 171, 179, 191
 
 WIDTH = 640
 HEIGHT = 680
