@@ -1,4 +1,5 @@
 from itertools import chain
+from pygame import Surface, display, draw, event, font, mouse
 import pygame as pg
 
 BG = 31, 34, 39
@@ -7,8 +8,8 @@ FG = 171, 179, 191
 WIDTH = 640
 HEIGHT = 680
 
-pg.font.init()
-FONT = pg.font.SysFont("sans-serif", 40)
+font.init()
+FONT = font.SysFont("sans-serif", 40)
 
 class State:
     def __init__(self):
@@ -17,12 +18,12 @@ class State:
         self.win = None
 
     def render(self):
-        s = pg.Surface((WIDTH, HEIGHT))
+        s = Surface((WIDTH, HEIGHT))
         s.fill(BG)
 
         for x in range(20, WIDTH, 200):
-            pg.draw.line(s, FG, (x, 20), (x, 620), 2)
-            pg.draw.line(s, FG, (20, x), (620, x), 2)
+            draw.line(s, FG, (x, 20), (x, 620), 2)
+            draw.line(s, FG, (20, x), (620, x), 2)
 
         for gx, gs in enumerate(self.board):
             for gy, g in enumerate(gs):
@@ -31,10 +32,10 @@ class State:
                 x = gx * 200 + 20
                 y = gy * 200 + 20
                 if g == 1:
-                    pg.draw.line(s, FG, (x + 50, y + 50), (x + 150, y + 150), 2)
-                    pg.draw.line(s, FG, (x + 150, y + 50), (x + 50, y + 150), 2)
+                    draw.line(s, FG, (x + 50, y + 50), (x + 150, y + 150), 2)
+                    draw.line(s, FG, (x + 150, y + 50), (x + 50, y + 150), 2)
                 elif g == 2:
-                    pg.draw.circle(s, FG, (x + 100, y + 100), 50, 2)
+                    draw.circle(s, FG, (x + 100, y + 100), 50, 2)
 
         if not self.win:
             msg = f"Player {self.turn}'s turn"
@@ -51,10 +52,10 @@ def handle(st, ev):
     if ev.type == pg.MOUSEBUTTONUP:
         if st.win: return State()
 
-        x, y = pg.mouse.get_pos()
+        x, y = mouse.get_pos()
 
         def get_grid(x):
-            if x < 20: return None
+            if x < 20: return
             if x < 220: return 0
             if x < 420: return 1
             if x < 620: return 2
@@ -86,13 +87,13 @@ def handle(st, ev):
 
 def main():
     pg.init()
-    screen = pg.display.set_mode((WIDTH, HEIGHT))
+    screen = display.set_mode((WIDTH, HEIGHT))
     st = State()
     while True:
-        for ev in pg.event.get():
+        for ev in event.get():
             if ev.type == pg.QUIT: return
             st = handle(st, ev)
             screen.blit(st.render(), (0, 0))
-            pg.display.update()
+            display.update()
 
 main()
