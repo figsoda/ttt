@@ -1,6 +1,7 @@
 from itertools import chain
 from pygame import Surface, display, draw, event, font, mouse
 import pygame as pg
+import sys
 
 BG = 31, 34, 39
 FG = 171, 179, 191
@@ -12,10 +13,47 @@ font.init()
 FONT = font.SysFont("sans-serif", 40)
 
 class State:
-    def __init__(self):
+    def __init__(self): self.reset()
+
+    def reset(self):
         self.board = [[None] * 3 for _ in range(3)]
         self.turn = 1
         self.win = None
+
+    def handle(self, ev):
+        if ev.type == pg.MOUSEBUTTONUP:
+            if self.win:
+                self.reset()
+                return
+
+            x, y = mouse.get_pos()
+
+            def get_grid(x):
+                if x < 20: return
+                if x < 220: return 0
+                if x < 420: return 1
+                if x < 620: return 2
+
+            gx = get_grid(x)
+            gy = get_grid(y)
+
+            if gx != None and gy != None and not self.board[gx][gy]:
+                self.board[gx][gy] = self.turn
+
+                for a, b, c in [
+                    *self.board,
+                    *zip(*self.board),
+                    (self.board[i][i] for i in range(3)),
+                    (self.board[2][0], self.board[1][1], self.board[0][2]),
+                ]:
+                    if a and a == b and b == c:
+                        self.win = self.turn
+                        return
+
+                if all(chain(*self.board)):
+                    self.win = 3
+                else:
+                    self.turn = 3 - self.turn
 
     def render(self):
         s = Surface((WIDTH, HEIGHT))
@@ -34,7 +72,7 @@ class State:
                 if g == 1:
                     draw.line(s, FG, (x + 50, y + 50), (x + 150, y + 150), 2)
                     draw.line(s, FG, (x + 150, y + 50), (x + 50, y + 150), 2)
-                elif g == 2:
+                else:
                     draw.circle(s, FG, (x + 100, y + 100), 50, 2)
 
         if not self.win:
@@ -48,52 +86,12 @@ class State:
 
         return s
 
-def handle(st, ev):
-    if ev.type == pg.MOUSEBUTTONUP:
-        if st.win: return State()
-
-        x, y = mouse.get_pos()
-
-        def get_grid(x):
-            if x < 20: return
-            if x < 220: return 0
-            if x < 420: return 1
-            if x < 620: return 2
-
-        gx = get_grid(x)
-        gy = get_grid(y)
-
-        if gx != None and gy != None:
-            if not st.board[gx][gy]:
-                st.board[gx][gy] = st.turn
-
-                for a, b, c in [
-                    *st.board,
-                    *zip(*st.board),
-                    (st.board[i][i] for i in range(3)),
-                    (st.board[2][0], st.board[1][1], st.board[0][2]),
-                ]:
-                    if a and a == b and b == c:
-                        st.win = st.turn
-                        return st
-
-                if all(chain(*st.board)):
-                    st.win = 3
-                    return st
-
-                st.turn = 3 - st.turn
-
-    return st
-
-def main():
-    pg.init()
-    screen = display.set_mode((WIDTH, HEIGHT))
-    st = State()
-    while True:
-        for ev in event.get():
-            if ev.type == pg.QUIT: return
-            st = handle(st, ev)
-            screen.blit(st.render(), (0, 0))
-            display.update()
-
-main()
+pg.init()
+screen = display.set_mode((WIDTH, HEIGHT))
+st = State()
+while True:
+    for ev in event.get():
+        if ev.type == pg.QUIT: sys.exit()
+        st.handle(ev)
+        screen.blit(st.render(), (0, 0))
+        display.update()
